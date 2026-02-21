@@ -1,0 +1,27 @@
+body {
+    font-family: sans-serif;
+    margin: 2em;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+}
+
+label {
+    margin-top: 1em;
+}
+
+input {
+    padding: 0.5em;
+    margin-top: 0.5em;
+}
+
+button {
+    margin-top: 1em;
+    padding: 0.5em;
+    background-color: lightblue;
+    border: none;
+    cursor: pointer;
+}
