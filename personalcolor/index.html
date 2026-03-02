@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CHROMIA — 퍼스널컬러 AI 진단</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=DM+Sans:wght@300;400;500&family=Noto+Serif+KR:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- ══════════ INTRO ══════════ -->
+<div id="screen-intro" class="screen active">
+  <div class="noise-overlay"></div>
+  <div class="intro-mesh">
+    <div class="mesh-circle c1"></div>
+    <div class="mesh-circle c2"></div>
+    <div class="mesh-circle c3"></div>
+    <div class="mesh-circle c4"></div>
+  </div>
+  <nav class="intro-nav">
+    <span class="logo">CHROMIA</span>
+    <span class="logo-sub">Personal Color AI</span>
+  </nav>
+  <div class="intro-body">
+    <div class="intro-tag">AI · 퍼스널컬러 · 12타입 진단</div>
+    <h1 class="intro-h1">당신의 빛깔을<br/><em>발견하세요</em></h1>
+    <p class="intro-p">카메라로 얼굴을 촬영하면 AI가 피부 톤을 정밀 분석하고<br/>12가지 퍼스널컬러 중 당신에게 꼭 맞는 컬러를 찾아드립니다.</p>
+    <div class="intro-dots">
+      <div class="id-dot" style="background:#FADADD;animation-delay:0s"></div>
+      <div class="id-dot" style="background:#FFD1A4;animation-delay:.1s"></div>
+      <div class="id-dot" style="background:#FFE57A;animation-delay:.2s"></div>
+      <div class="id-dot" style="background:#E6E6FA;animation-delay:.3s"></div>
+      <div class="id-dot" style="background:#9FB3C8;animation-delay:.4s"></div>
+      <div class="id-dot" style="background:#BC8F8F;animation-delay:.5s"></div>
+      <div class="id-dot" style="background:#CC5500;animation-delay:.6s"></div>
+      <div class="id-dot" style="background:#722F37;animation-delay:.7s"></div>
+      <div class="id-dot" style="background:#9E7B5A;animation-delay:.8s"></div>
+      <div class="id-dot" style="background:#0047AB;animation-delay:.9s"></div>
+      <div class="id-dot" style="background:#1C1C2E;animation-delay:1s"></div>
+      <div class="id-dot" style="background:#00BFFF;animation-delay:1.1s"></div>
+    </div>
+    <button class="btn-cta" id="btn-start">
+      진단 시작하기
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 9h10M10 5l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ══════════ CAMERA ══════════ -->
+<div id="screen-camera" class="screen">
+  <div class="noise-overlay light"></div>
+
+  <header class="top-header">
+    <button class="btn-ghost" id="btn-back-intro">← 처음으로</button>
+    <span class="logo dark">CHROMIA</span>
+    <div class="step-pills">
+      <span class="pill active">01 촬영</span>
+      <span class="pill-sep">·</span>
+      <span class="pill">02 분석</span>
+      <span class="pill-sep">·</span>
+      <span class="pill">03 결과</span>
+    </div>
+  </header>
+
+  <div class="cam-layout">
+
+    <div class="cam-center-col">
+      <!-- Frame -->
+      <div class="cam-frame-box" id="cam-frame-box">
+        <video id="video" autoplay playsinline muted></video>
+        <canvas id="canvas-hidden" style="display:none"></canvas>
+
+        <!-- Face oval guide -->
+        <div class="oval-guide">
+          <svg viewBox="0 0 320 420" fill="none" preserveAspectRatio="none">
+            <ellipse cx="160" cy="200" rx="115" ry="155"
+              stroke="rgba(201,169,110,0.75)" stroke-width="1.8"
+              stroke-dasharray="8 5"/>
+          </svg>
+        </div>
+
+        <!-- Scan bar (during analysis) -->
+        <div class="scan-wrap" id="scan-wrap">
+          <div class="scan-bar"></div>
+          <p class="scan-label">AI 분석 중…</p>
+        </div>
+
+        <!-- Flash -->
+        <div class="cam-flash" id="cam-flash"></div>
+
+        <!-- Corner deco -->
+        <div class="corner tl"></div><div class="corner tr"></div>
+        <div class="corner bl"></div><div class="corner br"></div>
+
+        <!-- Status label -->
+        <div class="cam-badge" id="cam-badge">얼굴을 타원 안에 맞춰주세요</div>
+      </div>
+
+      <!-- Shutter -->
+      <button class="shutter-btn" id="btn-capture">
+        <div class="shutter-ring"></div>
+        <div class="shutter-core"></div>
+      </button>
+      <p class="shutter-label">촬영 후 AI가 자동으로 퍼스널컬러를 분석합니다</p>
+
+      <!-- Analysis strip (visible after analysis) -->
+      <div class="analysis-strip" id="analysis-strip">
+        <div class="strip-group">
+          <span class="strip-lbl">피부톤</span>
+          <div class="strip-skin" id="strip-skin"></div>
+        </div>
+        <div class="strip-sep"></div>
+        <div class="strip-group">
+          <span class="strip-lbl">매칭 팔레트</span>
+          <div class="strip-palette" id="strip-palette"></div>
+        </div>
+        <div class="strip-sep"></div>
+        <div class="strip-group">
+          <span class="strip-lbl">진단 타입</span>
+          <span class="strip-type" id="strip-type">—</span>
+        </div>
+        <button class="strip-btn" id="btn-to-result">결과 보기 →</button>
+      </div>
+    </div>
+
+    <aside class="cam-aside">
+      <div class="tip-card">
+        <p class="tip-card-title">📸 촬영 가이드</p>
+        <ul class="tip-ul">
+          <li>자연광 또는 밝은 실내조명 권장</li>
+          <li>정면을 바라보고 편안한 표정 유지</li>
+          <li>짙은 메이크업은 결과에 영향을 줄 수 있음</li>
+          <li>머리카락이 얼굴을 가리지 않게 해주세요</li>
+        </ul>
+      </div>
+
+      <div class="type-preview-card">
+        <p class="tip-card-title">🎨 분석 대상 12타입</p>
+        <div class="type-grid">
+          <div class="tg-season">
+            <span class="tg-label spring-txt">봄 Spring</span>
+            <div class="tg-chips">
+              <span class="tg-chip spring">라이트</span>
+              <span class="tg-chip spring">웜</span>
+              <span class="tg-chip spring">브라이트</span>
+            </div>
+          </div>
+          <div class="tg-season">
+            <span class="tg-label summer-txt">여름 Summer</span>
+            <div class="tg-chips">
+              <span class="tg-chip summer">라이트</span>
+              <span class="tg-chip summer">쿨</span>
+              <span class="tg-chip summer">뮤트</span>
+            </div>
+          </div>
+          <div class="tg-season">
+            <span class="tg-label autumn-txt">가을 Autumn</span>
+            <div class="tg-chips">
+              <span class="tg-chip autumn">웜</span>
+              <span class="tg-chip autumn">딥</span>
+              <span class="tg-chip autumn">뮤트</span>
+            </div>
+          </div>
+          <div class="tg-season">
+            <span class="tg-label winter-txt">겨울 Winter</span>
+            <div class="tg-chips">
+              <span class="tg-chip winter">쿨</span>
+              <span class="tg-chip winter">딥</span>
+              <span class="tg-chip winter">브라이트</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+</div>
+
+<!-- ══════════ RESULT ══════════ -->
+<div id="screen-result" class="screen">
+  <div class="noise-overlay light"></div>
+  <div class="result-grad" id="result-grad"></div>
+
+  <header class="top-header">
+    <button class="btn-ghost" id="btn-back-camera">← 다시 촬영</button>
+    <span class="logo dark">CHROMIA</span>
+    <button class="btn-ghost" id="btn-retry-hd">↺ 새 진단</button>
+  </header>
+
+  <div class="result-layout">
+
+    <!-- LEFT -->
+    <div class="result-left">
+      <div class="result-photo-card">
+        <canvas id="canvas-result"></canvas>
+        <div class="rp-badge" id="rp-badge"></div>
+      </div>
+
+      <div class="skin-card">
+        <p class="skin-card-title">피부 분석 결과</p>
+        <div class="skin-row">
+          <span class="sk-lbl">감지 피부톤</span>
+          <div class="sk-dot" id="sk-dot"></div>
+          <span class="sk-hex" id="sk-hex">#—</span>
+        </div>
+        <div class="skin-row">
+          <span class="sk-lbl">톤 방향</span>
+          <span class="sk-val" id="sk-tone">—</span>
+        </div>
+        <div class="skin-row bar-row">
+          <span class="sk-lbl">밝기</span>
+          <div class="sk-bar"><div class="sk-fill" id="sk-brightness"></div></div>
+        </div>
+        <div class="skin-row bar-row">
+          <span class="sk-lbl">채도</span>
+          <div class="sk-bar"><div class="sk-fill" id="sk-saturation"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="result-right">
+
+      <!-- Hero: rep image + type name -->
+      <div class="hero-card" id="hero-card">
+        <div class="hero-img-wrap">
+          <img id="rep-img" src="" alt="퍼스널컬러 대표 이미지"/>
+          <div class="hero-img-fade"></div>
+        </div>
+        <div class="hero-text">
+          <p class="hero-eyebrow" id="hero-eyebrow"></p>
+          <h2 class="hero-title" id="hero-title"></h2>
+          <p class="hero-sub" id="hero-sub"></p>
+        </div>
+      </div>
+
+      <!-- Palette -->
+      <div class="palette-row-wrap">
+        <div class="pal-block best-block">
+          <p class="pal-head best-head"><span class="pal-icon">✦</span> 어울리는 색상</p>
+          <div class="pal-chips" id="res-best"></div>
+        </div>
+        <div class="pal-block avoid-block">
+          <p class="pal-head avoid-head"><span class="pal-icon">✕</span> 피해야 할 색상</p>
+          <div class="pal-chips" id="res-avoid"></div>
+        </div>
+      </div>
+
+      <!-- Style -->
+      <div class="style-block">
+        <p class="style-block-title">✦ 스타일 제안</p>
+        <div class="style-tags" id="res-tags"></div>
+        <div class="style-tips" id="res-tips"></div>
+      </div>
+
+      <button class="btn-retry-full" id="btn-retry-bot">↺ 다시 진단하기</button>
+    </div>
+
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
